@@ -3,446 +3,86 @@
 <head>
     <title>Scrum Poker</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            color: #333;
-            overflow-x: hidden;
-        }
-
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-        }
-
-        .glass-card {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(20px);
-            border-radius: 20px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            padding: 40px;
-            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.1);
-            transition: all 0.3s ease;
-        }
-
-        .glass-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 35px 60px rgba(0, 0, 0, 0.15);
-        }
-
-        #user-info {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: rgba(255, 255, 255, 0.9);
-            padding: 15px 20px;
-            border-radius: 50px;
-            backdrop-filter: blur(10px);
-            font-weight: 600;
-            color: #667eea;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-            z-index: 1000;
-            display: none;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .title {
-            text-align: center;
-            color: white;
-            font-size: 3.5rem;
-            font-weight: 800;
-            margin-bottom: 2rem;
-            text-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-            background: linear-gradient(45deg, #fff, #f0f0f0);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        .join-section {
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-            align-items: center;
-        }
-
-        .input-group {
-            display: flex;
-            gap: 15px;
-            align-items: center;
-            flex-wrap: wrap;
-            justify-content: center;
-        }
-
-        input {
-            padding: 15px 20px;
-            border: none;
-            border-radius: 15px;
-            background: rgba(255, 255, 255, 0.9);
-            font-size: 16px;
-            min-width: 200px;
-            outline: none;
-            transition: all 0.3s ease;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-        }
-
-        input:focus {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
-            background: white;
-        }
-
-        .btn {
-            padding: 15px 30px;
-            border: none;
-            border-radius: 15px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .btn-primary {
-            background: linear-gradient(45deg, #667eea, #764ba2);
-            color: white;
-            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
-        }
-
-        .btn-primary:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 15px 40px rgba(102, 126, 234, 0.4);
-        }
-
-        .btn-secondary {
-            background: rgba(255, 255, 255, 0.9);
-            color: #667eea;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-        }
-
-        .btn-secondary:hover {
-            background: white;
-            transform: translateY(-3px);
-            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
-        }
-
-        .btn:active {
-            transform: translateY(-1px);
-        }
-
-        .poker-section {
-            display: none;
-        }
-
-        .room-header {
-            text-align: center;
-            margin-bottom: 30px;
-        }
-
-        .room-id {
-            font-size: 1.5rem;
-            color: white;
-            background: rgba(255, 255, 255, 0.1);
-            padding: 10px 20px;
-            border-radius: 15px;
-            display: inline-block;
-            margin-bottom: 20px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-        }
-
-        .controls-section {
-            margin-bottom: 40px;
-        }
-
-        .section-title {
-            color: white;
-            font-size: 1.5rem;
-            font-weight: 700;
-            margin-bottom: 20px;
-            text-align: center;
-        }
-
-        .vote-buttons {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 15px;
-            justify-content: center;
-            margin-bottom: 30px;
-        }
-
-        .vote-btn {
-            width: 80px;
-            height: 80px;
-            border-radius: 20px;
-            border: none;
-            background: rgba(255, 255, 255, 0.9);
-            color: #667eea;
-            font-size: 1.5rem;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .vote-btn:hover {
-            transform: translateY(-5px) scale(1.05);
-            background: white;
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
-            color: #764ba2;
-        }
-
-        .vote-btn.selected {
-            background: linear-gradient(45deg, #667eea, #764ba2);
-            color: white;
-            transform: translateY(-5px) scale(1.1);
-            box-shadow: 0 15px 35px rgba(102, 126, 234, 0.4);
-        }
-
-        .action-buttons {
-            display: flex;
-            gap: 20px;
-            justify-content: center;
-        }
-
-        .participants-section {
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 20px;
-            padding: 30px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .participant-count {
-            text-align: center;
-            color: white;
-            font-size: 1.2rem;
-            margin-bottom: 20px;
-        }
-
-        .participants-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-            gap: 15px;
-        }
-
-        .participant-card {
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 15px;
-            padding: 20px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            transition: all 0.3s ease;
-            text-align: center;
-        }
-
-        .participant-card:hover {
-            transform: translateY(-3px);
-            background: rgba(255, 255, 255, 0.15);
-        }
-
-        .participant-name {
-            color: white;
-            font-weight: 600;
-            margin-bottom: 10px;
-            font-size: 1.1rem;
-        }
-
-        .participant-vote {
-            font-size: 2rem;
-            font-weight: 700;
-            color: #FFD700;
-            text-shadow: 0 2px 10px rgba(255, 215, 0, 0.3);
-        }
-
-        .floating-shapes {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: -1;
-        }
-
-        .shape {
-            position: absolute;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 50%;
-            animation: float 20s infinite linear;
-        }
-
-        .shape:nth-child(1) {
-            top: 20%;
-            left: 10%;
-            width: 80px;
-            height: 80px;
-            animation-delay: 0s;
-        }
-
-        .shape:nth-child(2) {
-            top: 60%;
-            right: 10%;
-            width: 120px;
-            height: 120px;
-            animation-delay: 5s;
-        }
-
-        .shape:nth-child(3) {
-            bottom: 20%;
-            left: 20%;
-            width: 60px;
-            height: 60px;
-            animation-delay: 10s;
-        }
-
-        @keyframes float {
-            0%, 100% {
-                transform: translateY(0px) rotate(0deg);
-            }
-            50% {
-                transform: translateY(-20px) rotate(180deg);
-            }
-        }
-
-        .fade-in {
-            animation: fadeIn 0.5s ease-in;
-        }
-
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .pulse {
-            animation: pulse 2s infinite;
-        }
-
-        @keyframes pulse {
-            0% {
-                transform: scale(1);
-            }
-            50% {
-                transform: scale(1.05);
-            }
-            100% {
-                transform: scale(1);
-            }
-        }
-
-        @media (max-width: 768px) {
-            .container {
-                padding: 15px;
-            }
-
-            .title {
-                font-size: 2.5rem;
-            }
-
-            .glass-card {
-                padding: 25px;
-            }
-
-            .input-group {
-                flex-direction: column;
-                width: 100%;
-            }
-
-            input {
-                width: 100%;
-                min-width: auto;
-            }
-
-            .vote-buttons {
-                grid-template-columns: repeat(3, 1fr);
-            }
-
-            .vote-btn {
-                width: 60px;
-                height: 60px;
-                font-size: 1.2rem;
-            }
-
-            .action-buttons {
-                flex-direction: column;
-            }
-        }
-    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-
-<div class="floating-shapes">
-    <div class="shape"></div>
-    <div class="shape"></div>
-    <div class="shape"></div>
-</div>
-
-<div id="user-info">
-    <span style="font-size: 1.2rem;">👤</span>
-    <span id="user-name"></span>
-</div>
 
 <div class="container">
     <h1 class="title pulse">Scrum Poker</h1>
 
-    <div id="join-area" class="glass-card fade-in">
-        <div class="join-section">
-            <div class="input-group">
-                <input id="username" placeholder="Enter your name"/>
-                <button class="btn btn-primary" onclick="createRoom()">Create Room</button>
-            </div>
-            <div style="color: rgba(255,255,255,0.8); font-size: 1.1rem; margin: 10px 0;">or</div>
-            <div class="input-group">
-                <input id="roomId" placeholder="Room ID"/>
-                <button class="btn btn-secondary" onclick="joinRoom()">Join Room</button>
-            </div>
+    <!-- Initial buttons -->
+    <div id="initial-buttons" class="card fade-in">
+        <button class="btn btn-primary" onclick="showCreateRoom()">
+            <span>🎯</span> Create Room
+        </button>
+        <button class="btn btn-outline" onclick="showJoinRoom()">
+            <span>🚪</span> Join Room
+        </button>
+    </div>
+
+    <!-- Create room form -->
+    <div id="create-room-form" class="card" style="display:none;">
+        <h2 style="margin-bottom: 1.5rem; color: var(--text-primary); font-weight: 600;">Create New Room</h2>
+        <div class="input-group">
+            <label class="input-label" for="create-username">Your Name</label>
+            <input id="create-username" class="input" placeholder="Enter your name" autocomplete="off" />
+        </div>
+        <div class="form-buttons">
+            <button class="btn btn-primary" onclick="createRoom()">
+                <span>✨</span> Create Room
+            </button>
+            <button class="btn btn-secondary" onclick="backToInitial()">Cancel</button>
         </div>
     </div>
 
-    <div id="poker-area" class="poker-section">
-        <div class="glass-card fade-in">
+    <!-- Join room form -->
+    <div id="join-room-form" class="card" style="display:none;">
+        <h2 style="margin-bottom: 1.5rem; color: var(--text-primary); font-weight: 600;">Join Existing Room</h2>
+        <div class="input-group">
+            <label class="input-label" for="join-username">Your Name</label>
+            <input id="join-username" class="input" placeholder="Enter your name" autocomplete="off" />
+        </div>
+        <div class="input-group">
+            <label class="input-label" for="join-roomId">Room ID</label>
+            <input id="join-roomId" class="input" placeholder="Enter room ID" autocomplete="off" style="text-transform: uppercase;" />
+        </div>
+        <div class="form-buttons">
+            <button class="btn btn-primary" onclick="joinRoom()">
+                <span>🎯</span> Join Room
+            </button>
+            <button class="btn btn-secondary" onclick="backToInitial()">Cancel</button>
+        </div>
+    </div>
+
+    <!-- Poker area -->
+    <div id="poker-area" class="poker-section" style="display:none;">
+        <div class="card fade-in">
             <div class="room-header">
-                <div class="room-id">Room: <span id="room-name"></span></div>
+                <span>Room</span>
+                <span class="room-id" id="room-name"></span>
             </div>
 
             <div class="controls-section">
-                <h3 class="section-title">Choose Your Estimate</h3>
+                <h3>Choose Your Estimate</h3>
                 <div id="vote-buttons" class="vote-buttons"></div>
 
                 <div class="action-buttons">
-                    <button id="reveal-btn" class="btn btn-primary" onclick="reveal()" style="display:none;">Reveal
-                        Cards
+                    <button id="reveal-btn" class="btn btn-primary" onclick="reveal()" style="display:none;">
+                        <span>👁️</span> Reveal Cards
                     </button>
-                    <button id="reset-btn" class="btn btn-secondary" onclick="reset()" style="display:none;">New Round
+                    <button id="reset-btn" class="btn btn-secondary" onclick="reset()" style="display:none;">
+                        <span>🔄</span> New Round
+                    </button>
+                    <button id="leave-btn" class="btn btn-outline" onclick="leaveRoom()">
+                        <span>🚪</span> Leave Room
                     </button>
                 </div>
             </div>
 
             <div class="participants-section">
                 <div class="participant-count">
-                    <strong>Team Members (<span id="total">0</span>)</strong>
+                    Team Members (<span id="total">0</span>)
                 </div>
                 <div id="users" class="participants-grid"></div>
             </div>
@@ -450,13 +90,41 @@
     </div>
 </div>
 
+<div id="user-info">
+    <div class="user-avatar" id="user-avatar"></div>
+    <span id="user-name"></span>
+</div>
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.5.1/sockjs.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+
 <script>
     let stompClient, roomId, username, owner, selectedVote;
 
-    const scores = ["0", "0.5", "1", "2", "3", "5", "8", "13", "?"];
+    const scores = ["0","0.2", "0.5", "1", "1.5", "2", "2.5", "3" ,"3.5" ,"4", "4.5", "5", "8", "?"];
 
+    // UI control functions
+    function showCreateRoom() {
+        document.getElementById("initial-buttons").style.display = "none";
+        document.getElementById("create-room-form").style.display = "block";
+        document.getElementById("join-room-form").style.display = "none";
+        document.getElementById("create-username").focus();
+    }
+
+    function showJoinRoom() {
+        document.getElementById("initial-buttons").style.display = "none";
+        document.getElementById("create-room-form").style.display = "none";
+        document.getElementById("join-room-form").style.display = "block";
+        document.getElementById("join-username").focus();
+    }
+
+    function backToInitial() {
+        document.getElementById("initial-buttons").style.display = "block";
+        document.getElementById("create-room-form").style.display = "none";
+        document.getElementById("join-room-form").style.display = "none";
+    }
+
+    // Render vote buttons dynamically
     function renderScoreButtons() {
         const container = document.getElementById("vote-buttons");
         container.innerHTML = "";
@@ -470,39 +138,43 @@
     }
 
     function selectVote(score, btnElement) {
-        // Remove selection from all buttons
         document.querySelectorAll('.vote-btn').forEach(btn => {
             btn.classList.remove('selected');
         });
-
-        // Add selection to clicked button
         btnElement.classList.add('selected');
         selectedVote = score;
-
-        // Send vote
         sendVote(score);
     }
 
+    // Create room: get name from create-username input
     function createRoom() {
-        username = document.getElementById("username").value.trim();
+        const btn = event.target;
+        username = document.getElementById("create-username").value.trim();
         if (!username) {
-            alert("Please enter your name");
+            showError("Please enter your name");
             return;
         }
+
+        btn.classList.add('loading');
         roomId = Math.random().toString(36).substring(2, 8).toUpperCase();
         startConnection("create");
     }
 
+    // Join room: get name + roomId from join form inputs
     function joinRoom() {
-        username = document.getElementById("username").value.trim();
-        roomId = document.getElementById("roomId").value.trim().toUpperCase();
+        const btn = event.target;
+        username = document.getElementById("join-username").value.trim();
+        roomId = document.getElementById("join-roomId").value.trim().toUpperCase();
         if (!username || !roomId) {
-            alert("Please enter your name and room ID");
+            showError("Please enter your name and room ID");
             return;
         }
+
+        btn.classList.add('loading');
         startConnection("join");
     }
 
+    // Start websocket connection and subscribe to topic
     function startConnection(type) {
         const socket = new SockJS('/ws');
         stompClient = Stomp.over(socket);
@@ -513,18 +185,18 @@
                 owner = data.owner;
 
                 const isOwner = owner === username;
-                document.getElementById("reveal-btn").style.display = isOwner ? "inline-block" : "none";
-                document.getElementById("reset-btn").style.display = isOwner ? "inline-block" : "none";
+                document.getElementById("reveal-btn").style.display = isOwner ? "inline-flex" : "none";
+                document.getElementById("reset-btn").style.display = isOwner ? "inline-flex" : "none";
             });
 
-            // Send the initial connection message
+            // Send the initial message to server
             stompClient.send("/app/poker", {}, JSON.stringify({
                 type: type,
                 roomId: roomId,
                 username: username
             }));
 
-            // If creating a room, also join it automatically
+            // If creating room, join it automatically after small delay
             if (type === "create") {
                 setTimeout(() => {
                     stompClient.send("/app/poker", {}, JSON.stringify({
@@ -535,19 +207,36 @@
                 }, 100);
             }
 
-            // Smooth transition
-            document.getElementById("join-area").style.display = 'none';
-            document.getElementById("poker-area").style.display = 'block';
+            // Update UI: hide join/create forms, show poker UI and user info
+            document.getElementById("create-room-form").style.display = "none";
+            document.getElementById("join-room-form").style.display = "none";
+            document.getElementById("initial-buttons").style.display = "none";
+
+            document.getElementById("poker-area").style.display = "block";
             document.getElementById("room-name").innerText = roomId;
+
             document.getElementById("user-info").style.display = "flex";
             document.getElementById("user-name").innerText = username;
+            document.getElementById("user-avatar").innerText = username.charAt(0).toUpperCase();
+
             renderScoreButtons();
 
             setTimeout(() => {
                 document.getElementById("poker-area").classList.add('fade-in');
             }, 100);
+
+            // Remove loading state
+            document.querySelectorAll('.loading').forEach(btn => {
+                btn.classList.remove('loading');
+            });
+        }, (error) => {
+            showError("Connection failed. Please try again.");
+            document.querySelectorAll('.loading').forEach(btn => {
+                btn.classList.remove('loading');
+            });
         });
 
+        // Clean up websocket on page unload
         window.addEventListener("beforeunload", () => {
             if (stompClient && stompClient.connected) {
                 stompClient.send("/app/poker", {}, JSON.stringify({
@@ -583,7 +272,6 @@
 
     function reset() {
         if (stompClient && stompClient.connected) {
-            // Clear selected vote
             selectedVote = null;
             document.querySelectorAll('.vote-btn').forEach(btn => {
                 btn.classList.remove('selected');
@@ -597,6 +285,24 @@
         }
     }
 
+    function leaveRoom() {
+        if (stompClient && stompClient.connected) {
+            stompClient.send("/app/poker", {}, JSON.stringify({
+                type: "leave",
+                roomId: roomId,
+                username: username
+            }));
+            stompClient.disconnect();
+        }
+        // Reset UI to initial state
+        selectedVote = null;
+        document.querySelectorAll('.vote-btn').forEach(btn => btn.classList.remove('selected'));
+
+        document.getElementById("poker-area").style.display = "none";
+        document.getElementById("user-info").style.display = "none";
+        backToInitial();
+    }
+
     function updateParticipants(data) {
         document.getElementById("total").innerText = data.count;
         const users = document.getElementById("users");
@@ -605,6 +311,14 @@
         data.participants.forEach(participant => {
             const card = document.createElement("div");
             card.className = "participant-card";
+
+            // Add special styling for owner and voted participants
+            if (participant.name === owner) {
+                card.classList.add('owner');
+            }
+            if (participant.vote && !data.revealed) {
+                card.classList.add('voted');
+            }
 
             const name = document.createElement("div");
             name.className = "participant-name";
@@ -615,7 +329,7 @@
 
             const vote = document.createElement("div");
             vote.className = "participant-vote";
-            vote.textContent = participant.vote || "🤔";
+            vote.textContent = data.revealed ? (participant.vote || "🤔") : (participant.vote ? "✅" : "🤔");
 
             card.appendChild(name);
             card.appendChild(vote);
@@ -623,52 +337,69 @@
         });
     }
 
-    // Add some interactive effects
-    document.addEventListener('DOMContentLoaded', function () {
-        // Add ripple effect to buttons
-        document.addEventListener('click', function (e) {
-            if (e.target.classList.contains('btn') || e.target.classList.contains('vote-btn')) {
-                const ripple = document.createElement('div');
-                const rect = e.target.getBoundingClientRect();
-                const size = Math.max(rect.width, rect.height);
-                const x = e.clientX - rect.left - size / 2;
-                const y = e.clientY - rect.top - size / 2;
+    function showError(message) {
+        // Remove existing error messages
+        document.querySelectorAll('.error-message').forEach(el => el.remove());
 
-                ripple.style.cssText = `
-                    position: absolute;
-                    border-radius: 50%;
-                    background: rgba(255,255,255,0.6);
-                    transform: scale(0);
-                    animation: ripple 0.6s linear;
-                    width: ${size}px;
-                    height: ${size}px;
-                    left: ${x}px;
-                    top: ${y}px;
-                    pointer-events: none;
-                `;
+        const errorDiv = document.createElement('div');
+        errorDiv.className = 'error-message';
+        errorDiv.textContent = message;
 
-                e.target.style.position = 'relative';
-                e.target.style.overflow = 'hidden';
-                e.target.appendChild(ripple);
+        const activeForm = document.querySelector('#create-room-form[style*="block"], #join-room-form[style*="block"]');
+        if (activeForm) {
+            activeForm.insertBefore(errorDiv, activeForm.firstChild);
+        }
 
-                setTimeout(() => {
-                    ripple.remove();
-                }, 600);
-            }
-        });
+        setTimeout(() => errorDiv.remove(), 5000);
+    }
+
+    // Ripple effect for buttons
+    document.addEventListener('click', function (e) {
+        if (e.target.classList.contains('btn') || e.target.classList.contains('vote-btn')) {
+            const ripple = document.createElement('div');
+            const rect = e.target.getBoundingClientRect();
+            const size = Math.max(rect.width, rect.height);
+            const x = e.clientX - rect.left - size / 2;
+            const y = e.clientY - rect.top - size / 2;
+
+            ripple.className = 'ripple';
+            ripple.style.cssText = `
+                width: ${size}px;
+                height: ${size}px;
+                left: ${x}px;
+                top: ${y}px;
+            `;
+
+            e.target.style.position = 'relative';
+            e.target.style.overflow = 'hidden';
+            e.target.appendChild(ripple);
+
+            setTimeout(() => ripple.remove(), 600);
+        }
     });
 
-    // Add ripple animation
-    const style = document.createElement('style');
-    style.textContent = `
-        @keyframes ripple {
-            to {
-                transform: scale(4);
-                opacity: 0;
+    // Keyboard shortcuts
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') {
+            const createForm = document.getElementById('create-room-form');
+            const joinForm = document.getElementById('join-room-form');
+
+            if (createForm.style.display === 'block') {
+                createRoom();
+            } else if (joinForm.style.display === 'block') {
+                joinRoom();
             }
         }
-    `;
-    document.head.appendChild(style);
+
+        if (e.key === 'Escape') {
+            backToInitial();
+        }
+    });
+
+    // Auto-uppercase room ID input
+    document.getElementById('join-roomId').addEventListener('input', function(e) {
+        e.target.value = e.target.value.toUpperCase();
+    });
 </script>
 
 </body>
