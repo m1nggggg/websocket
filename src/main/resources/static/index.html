@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Scrum Poker</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 40px;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .glass-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 35px 60px rgba(0, 0, 0, 0.15);
+        }
+
+        #user-info {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 15px 20px;
+            border-radius: 50px;
+            backdrop-filter: blur(10px);
+            font-weight: 600;
+            color: #667eea;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            display: none;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .title {
+            text-align: center;
+            color: white;
+            font-size: 3.5rem;
+            font-weight: 800;
+            margin-bottom: 2rem;
+            text-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            background: linear-gradient(45deg, #fff, #f0f0f0);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .join-section {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        input {
+            padding: 15px 20px;
+            border: none;
+            border-radius: 15px;
+            background: rgba(255, 255, 255, 0.9);
+            font-size: 16px;
+            min-width: 200px;
+            outline: none;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        input:focus {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+            background: white;
+        }
+
+        .btn {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 15px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.9);
+            color: #667eea;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-secondary:hover {
+            background: white;
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        .btn:active {
+            transform: translateY(-1px);
+        }
+
+        .poker-section {
+            display: none;
+        }
+
+        .room-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .room-id {
+            font-size: 1.5rem;
+            color: white;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 10px 20px;
+            border-radius: 15px;
+            display: inline-block;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .controls-section {
+            margin-bottom: 40px;
+        }
+
+        .section-title {
+            color: white;
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .vote-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            justify-content: center;
+            margin-bottom: 30px;
+        }
+
+        .vote-btn {
+            width: 80px;
+            height: 80px;
+            border-radius: 20px;
+            border: none;
+            background: rgba(255, 255, 255, 0.9);
+            color: #667eea;
+            font-size: 1.5rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .vote-btn:hover {
+            transform: translateY(-5px) scale(1.05);
+            background: white;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+            color: #764ba2;
+        }
+
+        .vote-btn.selected {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            transform: translateY(-5px) scale(1.1);
+            box-shadow: 0 15px 35px rgba(102, 126, 234, 0.4);
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+        }
+
+        .participants-section {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            padding: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .participant-count {
+            text-align: center;
+            color: white;
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+        }
+
+        .participants-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .participant-card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .participant-card:hover {
+            transform: translateY(-3px);
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .participant-name {
+            color: white;
+            font-weight: 600;
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+        }
+
+        .participant-vote {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #FFD700;
+            text-shadow: 0 2px 10px rgba(255, 215, 0, 0.3);
+        }
+
+        .floating-shapes {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .shape {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            animation: float 20s infinite linear;
+        }
+
+        .shape:nth-child(1) {
+            top: 20%;
+            left: 10%;
+            width: 80px;
+            height: 80px;
+            animation-delay: 0s;
+        }
+
+        .shape:nth-child(2) {
+            top: 60%;
+            right: 10%;
+            width: 120px;
+            height: 120px;
+            animation-delay: 5s;
+        }
+
+        .shape:nth-child(3) {
+            bottom: 20%;
+            left: 20%;
+            width: 60px;
+            height: 60px;
+            animation-delay: 10s;
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0px) rotate(0deg);
+            }
+            50% {
+                transform: translateY(-20px) rotate(180deg);
+            }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.05);
+            }
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+
+            .title {
+                font-size: 2.5rem;
+            }
+
+            .glass-card {
+                padding: 25px;
+            }
+
+            .input-group {
+                flex-direction: column;
+                width: 100%;
+            }
+
+            input {
+                width: 100%;
+                min-width: auto;
+            }
+
+            .vote-buttons {
+                grid-template-columns: repeat(3, 1fr);
+            }
+
+            .vote-btn {
+                width: 60px;
+                height: 60px;
+                font-size: 1.2rem;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="floating-shapes">
+    <div class="shape"></div>
+    <div class="shape"></div>
+    <div class="shape"></div>
+</div>
+
+<div id="user-info">
+    <span style="font-size: 1.2rem;">👤</span>
+    <span id="user-name"></span>
+</div>
+
+<div class="container">
+    <h1 class="title pulse">Scrum Poker</h1>
+
+    <div id="join-area" class="glass-card fade-in">
+        <div class="join-section">
+            <div class="input-group">
+                <input id="username" placeholder="Enter your name"/>
+                <button class="btn btn-primary" onclick="createRoom()">Create Room</button>
+            </div>
+            <div style="color: rgba(255,255,255,0.8); font-size: 1.1rem; margin: 10px 0;">or</div>
+            <div class="input-group">
+                <input id="roomId" placeholder="Room ID"/>
+                <button class="btn btn-secondary" onclick="joinRoom()">Join Room</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="poker-area" class="poker-section">
+        <div class="glass-card fade-in">
+            <div class="room-header">
+                <div class="room-id">Room: <span id="room-name"></span></div>
+            </div>
+
+            <div class="controls-section">
+                <h3 class="section-title">Choose Your Estimate</h3>
+                <div id="vote-buttons" class="vote-buttons"></div>
+
+                <div class="action-buttons">
+                    <button id="reveal-btn" class="btn btn-primary" onclick="reveal()" style="display:none;">Reveal
+                        Cards
+                    </button>
+                    <button id="reset-btn" class="btn btn-secondary" onclick="reset()" style="display:none;">New Round
+                    </button>
+                </div>
+            </div>
+
+            <div class="participants-section">
+                <div class="participant-count">
+                    <strong>Team Members (<span id="total">0</span>)</strong>
+                </div>
+                <div id="users" class="participants-grid"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.5.1/sockjs.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+<script>
+    let stompClient, roomId, username, owner, selectedVote;
+
+    const scores = ["0", "0.5", "1", "2", "3", "5", "8", "13", "?"];
+
+    function renderScoreButtons() {
+        const container = document.getElementById("vote-buttons");
+        container.innerHTML = "";
+        scores.forEach(score => {
+            const btn = document.createElement("button");
+            btn.className = "vote-btn";
+            btn.innerText = score;
+            btn.onclick = () => selectVote(score, btn);
+            container.appendChild(btn);
+        });
+    }
+
+    function selectVote(score, btnElement) {
+        // Remove selection from all buttons
+        document.querySelectorAll('.vote-btn').forEach(btn => {
+            btn.classList.remove('selected');
+        });
+
+        // Add selection to clicked button
+        btnElement.classList.add('selected');
+        selectedVote = score;
+
+        // Send vote
+        sendVote(score);
+    }
+
+    function createRoom() {
+        username = document.getElementById("username").value.trim();
+        if (!username) {
+            alert("Please enter your name");
+            return;
+        }
+        roomId = Math.random().toString(36).substring(2, 8).toUpperCase();
+        startConnection("create");
+    }
+
+    function joinRoom() {
+        username = document.getElementById("username").value.trim();
+        roomId = document.getElementById("roomId").value.trim().toUpperCase();
+        if (!username || !roomId) {
+            alert("Please enter your name and room ID");
+            return;
+        }
+        startConnection("join");
+    }
+
+    function startConnection(type) {
+        const socket = new SockJS('/ws');
+        stompClient = Stomp.over(socket);
+        stompClient.connect({}, () => {
+            stompClient.subscribe('/topic/' + roomId, (message) => {
+                const data = JSON.parse(message.body);
+                updateParticipants(data);
+                owner = data.owner;
+
+                const isOwner = owner === username;
+                document.getElementById("reveal-btn").style.display = isOwner ? "inline-block" : "none";
+                document.getElementById("reset-btn").style.display = isOwner ? "inline-block" : "none";
+            });
+
+            // Send the initial connection message
+            stompClient.send("/app/poker", {}, JSON.stringify({
+                type: type,
+                roomId: roomId,
+                username: username
+            }));
+
+            // If creating a room, also join it automatically
+            if (type === "create") {
+                setTimeout(() => {
+                    stompClient.send("/app/poker", {}, JSON.stringify({
+                        type: "join",
+                        roomId: roomId,
+                        username: username
+                    }));
+                }, 100);
+            }
+
+            // Smooth transition
+            document.getElementById("join-area").style.display = 'none';
+            document.getElementById("poker-area").style.display = 'block';
+            document.getElementById("room-name").innerText = roomId;
+            document.getElementById("user-info").style.display = "flex";
+            document.getElementById("user-name").innerText = username;
+            renderScoreButtons();
+
+            setTimeout(() => {
+                document.getElementById("poker-area").classList.add('fade-in');
+            }, 100);
+        });
+
+        window.addEventListener("beforeunload", () => {
+            if (stompClient && stompClient.connected) {
+                stompClient.send("/app/poker", {}, JSON.stringify({
+                    type: "leave",
+                    roomId: roomId,
+                    username: username
+                }));
+                stompClient.disconnect();
+            }
+        });
+    }
+
+    function sendVote(vote) {
+        if (stompClient && stompClient.connected) {
+            stompClient.send("/app/poker", {}, JSON.stringify({
+                type: "vote",
+                roomId: roomId,
+                username: username,
+                vote: vote
+            }));
+        }
+    }
+
+    function reveal() {
+        if (stompClient && stompClient.connected) {
+            stompClient.send("/app/poker", {}, JSON.stringify({
+                type: "reveal",
+                roomId: roomId,
+                username: username
+            }));
+        }
+    }
+
+    function reset() {
+        if (stompClient && stompClient.connected) {
+            // Clear selected vote
+            selectedVote = null;
+            document.querySelectorAll('.vote-btn').forEach(btn => {
+                btn.classList.remove('selected');
+            });
+
+            stompClient.send("/app/poker", {}, JSON.stringify({
+                type: "reset",
+                roomId: roomId,
+                username: username
+            }));
+        }
+    }
+
+    function updateParticipants(data) {
+        document.getElementById("total").innerText = data.count;
+        const users = document.getElementById("users");
+        users.innerHTML = "";
+
+        data.participants.forEach(participant => {
+            const card = document.createElement("div");
+            card.className = "participant-card";
+
+            const name = document.createElement("div");
+            name.className = "participant-name";
+            name.textContent = participant.name;
+            if (participant.name === owner) {
+                name.textContent += " 👑";
+            }
+
+            const vote = document.createElement("div");
+            vote.className = "participant-vote";
+            vote.textContent = participant.vote || "🤔";
+
+            card.appendChild(name);
+            card.appendChild(vote);
+            users.appendChild(card);
+        });
+    }
+
+    // Add some interactive effects
+    document.addEventListener('DOMContentLoaded', function () {
+        // Add ripple effect to buttons
+        document.addEventListener('click', function (e) {
+            if (e.target.classList.contains('btn') || e.target.classList.contains('vote-btn')) {
+                const ripple = document.createElement('div');
+                const rect = e.target.getBoundingClientRect();
+                const size = Math.max(rect.width, rect.height);
+                const x = e.clientX - rect.left - size / 2;
+                const y = e.clientY - rect.top - size / 2;
+
+                ripple.style.cssText = `
+                    position: absolute;
+                    border-radius: 50%;
+                    background: rgba(255,255,255,0.6);
+                    transform: scale(0);
+                    animation: ripple 0.6s linear;
+                    width: ${size}px;
+                    height: ${size}px;
+                    left: ${x}px;
+                    top: ${y}px;
+                    pointer-events: none;
+                `;
+
+                e.target.style.position = 'relative';
+                e.target.style.overflow = 'hidden';
+                e.target.appendChild(ripple);
+
+                setTimeout(() => {
+                    ripple.remove();
+                }, 600);
+            }
+        });
+    });
+
+    // Add ripple animation
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes ripple {
+            to {
+                transform: scale(4);
+                opacity: 0;
+            }
+        }
+    `;
+    document.head.appendChild(style);
+</script>
+
+</body>
+</html>
