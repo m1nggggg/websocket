@@ -9,36 +9,27 @@
 <body>
 
 <div class="container">
-    <h1 class="title pulse">Scrum Poker</h1>
+    <h1 class="title pulse">Krypton Poker</h1>
 
-    <!-- Initial buttons -->
     <div id="initial-buttons" class="card fade-in">
-        <button class="btn btn-primary" onclick="showCreateRoom()">
-            <span>🎯</span> Create Room
-        </button>
-        <button class="btn btn-outline" onclick="showJoinRoom()">
-            <span>🚪</span> Join Room
-        </button>
+        <button class="btn btn-primary" onclick="showCreateRoom()"><span>🎯</span> Create Room</button>
+        <button class="btn btn-outline" onclick="showJoinRoom()"><span>🚪</span> Join Room</button>
     </div>
 
-    <!-- Create room form -->
     <div id="create-room-form" class="card" style="display:none;">
-        <h2 style="margin-bottom: 1.5rem; color: var(--text-primary); font-weight: 600;">Create New Room</h2>
+        <h2>Create New Room</h2>
         <div class="input-group">
             <label class="input-label" for="create-username">Your Name</label>
             <input id="create-username" class="input" placeholder="Enter your name" autocomplete="off" />
         </div>
         <div class="form-buttons">
-            <button class="btn btn-primary" onclick="createRoom()">
-                <span>✨</span> Create Room
-            </button>
+            <button class="btn btn-primary" onclick="createRoom()"><span>✨</span> Create Room</button>
             <button class="btn btn-secondary" onclick="backToInitial()">Cancel</button>
         </div>
     </div>
 
-    <!-- Join room form -->
     <div id="join-room-form" class="card" style="display:none;">
-        <h2 style="margin-bottom: 1.5rem; color: var(--text-primary); font-weight: 600;">Join Existing Room</h2>
+        <h2>Join Existing Room</h2>
         <div class="input-group">
             <label class="input-label" for="join-username">Your Name</label>
             <input id="join-username" class="input" placeholder="Enter your name" autocomplete="off" />
@@ -48,19 +39,19 @@
             <input id="join-roomId" class="input" placeholder="Enter room ID" autocomplete="off" style="text-transform: uppercase;" />
         </div>
         <div class="form-buttons">
-            <button class="btn btn-primary" onclick="joinRoom()">
-                <span>🎯</span> Join Room
-            </button>
+            <button class="btn btn-primary" onclick="joinRoom()"><span>🎯</span> Join Room</button>
             <button class="btn btn-secondary" onclick="backToInitial()">Cancel</button>
         </div>
     </div>
 
-    <!-- Poker area -->
     <div id="poker-area" class="poker-section" style="display:none;">
         <div class="card fade-in">
             <div class="room-header">
                 <span>Room</span>
-                <span class="room-id" id="room-name"></span>
+                <div>
+                    <span class="room-id" id="room-name"></span>
+                    <button id="copy-room-id" class="copy-btn" title="Copy Room ID">📑</button>
+                </div>
             </div>
 
             <div class="controls-section">
@@ -68,15 +59,9 @@
                 <div id="vote-buttons" class="vote-buttons"></div>
 
                 <div class="action-buttons">
-                    <button id="reveal-btn" class="btn btn-primary" onclick="reveal()" style="display:none;">
-                        <span>👁️</span> Reveal Cards
-                    </button>
-                    <button id="reset-btn" class="btn btn-secondary" onclick="reset()" style="display:none;">
-                        <span>🔄</span> New Round
-                    </button>
-                    <button id="leave-btn" class="btn btn-outline" onclick="leaveRoom()">
-                        <span>🚪</span> Leave Room
-                    </button>
+                    <button id="reveal-btn" class="btn btn-primary" onclick="reveal()" style="display:none;"><span>👀</span> Reveal Cards</button>
+                    <button id="reset-btn" class="btn btn-secondary" onclick="reset()" style="display:none;"><span>⤶</span> New Round</button>
+                    <button id="leave-btn" class="btn btn-outline" onclick="leaveRoom()"><span>🔚</span> Leave Room</button>
                 </div>
             </div>
 
@@ -85,6 +70,12 @@
                     Team Members (<span id="total">0</span>)
                 </div>
                 <div id="users" class="participants-grid"></div>
+            </div>
+
+            <!-- ✅ Vote statistics -->
+            <div id="vote-stats" class="vote-stats" style="display:none;">
+                <h3>Vote Summary</h3>
+                <div id="vote-summary"></div>
             </div>
         </div>
     </div>
@@ -103,7 +94,6 @@
 
     const scores = ["0","0.2", "0.5", "1", "1.5", "2", "2.5", "3" ,"3.5" ,"4", "4.5", "5", "8", "?"];
 
-    // UI control functions
     function showCreateRoom() {
         document.getElementById("initial-buttons").style.display = "none";
         document.getElementById("create-room-form").style.display = "block";
@@ -124,7 +114,6 @@
         document.getElementById("join-room-form").style.display = "none";
     }
 
-    // Render vote buttons dynamically
     function renderScoreButtons() {
         const container = document.getElementById("vote-buttons");
         container.innerHTML = "";
@@ -138,43 +127,30 @@
     }
 
     function selectVote(score, btnElement) {
-        document.querySelectorAll('.vote-btn').forEach(btn => {
-            btn.classList.remove('selected');
-        });
+        document.querySelectorAll('.vote-btn').forEach(btn => btn.classList.remove('selected'));
         btnElement.classList.add('selected');
         selectedVote = score;
         sendVote(score);
     }
 
-    // Create room: get name from create-username input
     function createRoom() {
         const btn = event.target;
         username = document.getElementById("create-username").value.trim();
-        if (!username) {
-            showError("Please enter your name");
-            return;
-        }
-
+        if (!username) return showError("Please enter your name");
         btn.classList.add('loading');
         roomId = Math.random().toString(36).substring(2, 8).toUpperCase();
         startConnection("create");
     }
 
-    // Join room: get name + roomId from join form inputs
     function joinRoom() {
         const btn = event.target;
         username = document.getElementById("join-username").value.trim();
         roomId = document.getElementById("join-roomId").value.trim().toUpperCase();
-        if (!username || !roomId) {
-            showError("Please enter your name and room ID");
-            return;
-        }
-
+        if (!username || !roomId) return showError("Please enter your name and room ID");
         btn.classList.add('loading');
         startConnection("join");
     }
 
-    // Start websocket connection and subscribe to topic
     function startConnection(type) {
         const socket = new SockJS('/ws');
         stompClient = Stomp.over(socket);
@@ -183,20 +159,17 @@
                 const data = JSON.parse(message.body);
                 updateParticipants(data);
                 owner = data.owner;
-
                 const isOwner = owner === username;
                 document.getElementById("reveal-btn").style.display = isOwner ? "inline-flex" : "none";
                 document.getElementById("reset-btn").style.display = isOwner ? "inline-flex" : "none";
             });
 
-            // Send the initial message to server
             stompClient.send("/app/poker", {}, JSON.stringify({
                 type: type,
                 roomId: roomId,
                 username: username
             }));
 
-            // If creating room, join it automatically after small delay
             if (type === "create") {
                 setTimeout(() => {
                     stompClient.send("/app/poker", {}, JSON.stringify({
@@ -207,36 +180,26 @@
                 }, 100);
             }
 
-            // Update UI: hide join/create forms, show poker UI and user info
             document.getElementById("create-room-form").style.display = "none";
             document.getElementById("join-room-form").style.display = "none";
             document.getElementById("initial-buttons").style.display = "none";
-
             document.getElementById("poker-area").style.display = "block";
             document.getElementById("room-name").innerText = roomId;
-
             document.getElementById("user-info").style.display = "flex";
             document.getElementById("user-name").innerText = username;
             document.getElementById("user-avatar").innerText = username.charAt(0).toUpperCase();
-
             renderScoreButtons();
 
             setTimeout(() => {
                 document.getElementById("poker-area").classList.add('fade-in');
             }, 100);
 
-            // Remove loading state
-            document.querySelectorAll('.loading').forEach(btn => {
-                btn.classList.remove('loading');
-            });
-        }, (error) => {
+            document.querySelectorAll('.loading').forEach(btn => btn.classList.remove('loading'));
+        }, () => {
             showError("Connection failed. Please try again.");
-            document.querySelectorAll('.loading').forEach(btn => {
-                btn.classList.remove('loading');
-            });
+            document.querySelectorAll('.loading').forEach(btn => btn.classList.remove('loading'));
         });
 
-        // Clean up websocket on page unload
         window.addEventListener("beforeunload", () => {
             if (stompClient && stompClient.connected) {
                 stompClient.send("/app/poker", {}, JSON.stringify({
@@ -273,10 +236,8 @@
     function reset() {
         if (stompClient && stompClient.connected) {
             selectedVote = null;
-            document.querySelectorAll('.vote-btn').forEach(btn => {
-                btn.classList.remove('selected');
-            });
-
+            document.querySelectorAll('.vote-btn').forEach(btn => btn.classList.remove('selected'));
+            document.getElementById("vote-stats").style.display = "none";
             stompClient.send("/app/poker", {}, JSON.stringify({
                 type: "reset",
                 roomId: roomId,
@@ -294,12 +255,11 @@
             }));
             stompClient.disconnect();
         }
-        // Reset UI to initial state
         selectedVote = null;
         document.querySelectorAll('.vote-btn').forEach(btn => btn.classList.remove('selected'));
-
         document.getElementById("poker-area").style.display = "none";
         document.getElementById("user-info").style.display = "none";
+        document.getElementById("vote-stats").style.display = "none";
         backToInitial();
     }
 
@@ -308,52 +268,63 @@
         const users = document.getElementById("users");
         users.innerHTML = "";
 
+        const voteValues = [];
+
         data.participants.forEach(participant => {
             const card = document.createElement("div");
             card.className = "participant-card";
 
-            // Add special styling for owner and voted participants
-            if (participant.name === owner) {
-                card.classList.add('owner');
-            }
-            if (participant.vote && !data.revealed) {
-                card.classList.add('voted');
-            }
+            if (participant.name === data.owner) card.classList.add("owner");
+            if (participant.vote && !data.revealed) card.classList.add("voted");
 
             const name = document.createElement("div");
             name.className = "participant-name";
-            name.textContent = participant.name;
-            if (participant.name === owner) {
-                name.textContent += " 👑";
-            }
+            name.textContent = participant.name + (participant.name === data.owner ? " 👑" : "");
 
             const vote = document.createElement("div");
             vote.className = "participant-vote";
-            vote.textContent = data.revealed ? (participant.vote || "🤔") : (participant.vote ? "✅" : "🤔");
+            vote.textContent = data.revealed
+                ? (participant.vote || "⏳")
+                : (participant.vote ? "✅" : "⏳");
 
             card.appendChild(name);
             card.appendChild(vote);
             users.appendChild(card);
+
+            if (data.revealed && !isNaN(parseFloat(participant.vote))) {
+                voteValues.push({ name: participant.name, vote: parseFloat(participant.vote) });
+            }
         });
+
+        if (data.revealed && voteValues.length > 0) {
+            const total = voteValues.reduce((sum, v) => sum + v.vote, 0);
+            const avg = (total / voteValues.length).toFixed(2);
+            const min = Math.min(...voteValues.map(v => v.vote));
+            const max = Math.max(...voteValues.map(v => v.vote));
+            const minNames = voteValues.filter(v => v.vote === min).map(v => v.name).join(", ");
+            const maxNames = voteValues.filter(v => v.vote === max).map(v => v.name).join(", ");
+
+            document.getElementById("vote-summary").innerHTML = `
+            <p><strong>Average:</strong> ${avg}</p>
+            <p><strong>Min:</strong> ${min} (by ${minNames})</p>
+            <p><strong>Max:</strong> ${max} (by ${maxNames})</p>
+        `;
+            document.getElementById("vote-stats").style.display = "block";
+        } else {
+            document.getElementById("vote-stats").style.display = "none";
+        }
     }
 
     function showError(message) {
-        // Remove existing error messages
         document.querySelectorAll('.error-message').forEach(el => el.remove());
-
         const errorDiv = document.createElement('div');
         errorDiv.className = 'error-message';
         errorDiv.textContent = message;
-
         const activeForm = document.querySelector('#create-room-form[style*="block"], #join-room-form[style*="block"]');
-        if (activeForm) {
-            activeForm.insertBefore(errorDiv, activeForm.firstChild);
-        }
-
+        if (activeForm) activeForm.insertBefore(errorDiv, activeForm.firstChild);
         setTimeout(() => errorDiv.remove(), 5000);
     }
 
-    // Ripple effect for buttons
     document.addEventListener('click', function (e) {
         if (e.target.classList.contains('btn') || e.target.classList.contains('vote-btn')) {
             const ripple = document.createElement('div');
@@ -363,43 +334,38 @@
             const y = e.clientY - rect.top - size / 2;
 
             ripple.className = 'ripple';
-            ripple.style.cssText = `
-                width: ${size}px;
-                height: ${size}px;
-                left: ${x}px;
-                top: ${y}px;
-            `;
+            ripple.style.cssText = `width:${size}px;height:${size}px;left:${x}px;top:${y}px;`;
 
             e.target.style.position = 'relative';
             e.target.style.overflow = 'hidden';
             e.target.appendChild(ripple);
-
             setTimeout(() => ripple.remove(), 600);
         }
     });
 
-    // Keyboard shortcuts
     document.addEventListener('keydown', function(e) {
         if (e.key === 'Enter') {
             const createForm = document.getElementById('create-room-form');
             const joinForm = document.getElementById('join-room-form');
-
-            if (createForm.style.display === 'block') {
-                createRoom();
-            } else if (joinForm.style.display === 'block') {
-                joinRoom();
-            }
+            if (createForm.style.display === 'block') createRoom();
+            else if (joinForm.style.display === 'block') joinRoom();
         }
-
         if (e.key === 'Escape') {
             backToInitial();
         }
     });
 
-    // Auto-uppercase room ID input
     document.getElementById('join-roomId').addEventListener('input', function(e) {
         e.target.value = e.target.value.toUpperCase();
     });
+
+    document.getElementById("copy-room-id").addEventListener("click", function () {
+        const roomCode = document.getElementById("room-name").innerText;
+        if (!roomCode) return;
+
+        navigator.clipboard.writeText(roomCode)
+    });
+
 </script>
 
 </body>
